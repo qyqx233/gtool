@@ -34,35 +34,26 @@ func (b *BytesIter) Reset() {
 	b.ro = 0
 }
 
-func (b *BytesIter) SetBytes(bs []byte, n int) *BytesIter {
-	b.buf = uintptr(unsafe.Pointer(&bs))
-	b.wo = n
-	b.ro = 0
-	return b
-}
-
 func (bi *BytesIter) Bytes() []byte {
-	// return *(*[]byte)(unsafe.Pointer(&byteSliceStru{bi.buf, bi.cap, bi.cap}))
-	return *(*[]byte)(unsafe.Pointer(bi.buf))
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	return buf[:bi.wo]
 }
 
 func (bi *BytesIter) WriteUint64(u uint64) int {
-	// var l = int(unsafe.Sizeof(u))
-	// sl := *(*[]byte)(unsafe.Pointer(&byteSliceStru{bi.buf, bi.cap, bi.cap}))
-	// copy(sl[bi.wo:], convert.Uint642Bytes(u))
-	// bi.wo += l
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
 	copy(buf[bi.wo:], convert.Uint642Bytes(u))
 	bi.wo += int(unsafe.Sizeof(u))
 	return bi.wo
 }
 
+func (bi *BytesIter) WriteInt(u int) int {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	copy(buf[bi.wo:], convert.Int2Bytes(u))
+	bi.wo += int(unsafe.Sizeof(u))
+	return bi.wo
+}
+
 func (bi *BytesIter) WriteString(s string) int {
-	// var l = len(s)
-	// buf := *(*[]byte)(unsafe.Pointer(&byteSliceStru{bi.buf, bi.cap, bi.cap}))
-	// buf[bi.wo] = byte(l)
-	// copy(buf[bi.wo+1:], s)
-	// bi.wo += (l + 1)
 	var l = len(s)
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
 	buf[bi.wo] = byte(l)
@@ -78,6 +69,13 @@ func (bi *BytesIter) WriteBytes(s []byte) int {
 	buf[bi.wo] = byte(l)
 	copy(buf[bi.wo+1:], s)
 	bi.wo += (l + 1)
+	return bi.wo
+}
+
+func (bi *BytesIter) WriteByte(b byte) int {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	buf[bi.wo] = b
+	bi.wo += 1
 	return bi.wo
 }
 
@@ -107,14 +105,28 @@ func (bi *BytesIter) IterStringSafe() string {
 }
 
 func (bi *BytesIter) IterUint64() uint64 {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	u := *(*uint64)(unsafe.Pointer(&buf[bi.ro]))
+	bi.ro += int(unsafe.Sizeof(uint64(0)))
+	return u
+}
+
+func (bi *BytesIter) IterInt() int {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	u := *(*int)(unsafe.Pointer(&buf[bi.ro]))
+	bi.ro += int(unsafe.Sizeof(int(0)))
+	return u
+}
+
+func (bi *BytesIter) IterByte() byte {
 	// buf := *(*[]byte)(unsafe.Pointer(&byteSliceStru{bi.buf, bi.cap, bi.cap}))
 	// u := *(*uint64)(unsafe.Pointer(&buf[bi.ro]))
 	// bi.ro += int(unsafe.Sizeof(uint64(0)))
 	// return u
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
-	u := *(*uint64)(unsafe.Pointer(&buf[bi.ro]))
-	bi.ro += int(unsafe.Sizeof(uint64(0)))
-	return u
+	b := *(*byte)(unsafe.Pointer(&buf[bi.ro]))
+	bi.ro += int(unsafe.Sizeof(byte(0)))
+	return b
 }
 
 func (bi *BytesIter) Dump(bs []byte) int {
