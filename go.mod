@@ -1,4 +1,4 @@
-module github.com/qyqx233/fastweb
+module github.com/qyqx233/gtool
 
 go 1.13
 
