@@ -30,7 +30,7 @@ func (b *ByteBuffer) WriteString(s string) {
 		b.buf = buf
 		b.cap = len(buf)
 	} else {
-		copy(b.buf, s)
+		copy(b.buf[b.len:], s)
 	}
 	b.len += len(s)
 }
@@ -51,11 +51,16 @@ func (b *ByteBuffer) WriteBytes(s []byte) {
 		b.buf = buf
 		b.cap = len(buf)
 	} else {
-		copy(b.buf, s)
+		copy(b.buf[b.len:], s)
 	}
 	b.len += len(s)
 }
 
 func (b *ByteBuffer) String() string {
-	return *(*string)(unsafe.Pointer(&b.buf))
+	buf := b.buf[:b.len]
+	return *(*string)(unsafe.Pointer(&buf))
+}
+
+func (b *ByteBuffer) Bytes() []byte {
+	return b.buf[:b.len]
 }

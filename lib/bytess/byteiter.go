@@ -53,6 +53,13 @@ func (bi *BytesIter) WriteInt(u int) int {
 	return bi.wo
 }
 
+func (bi *BytesIter) WriteInt64(u int64) int {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	copy(buf[bi.wo:], convert.Int642Bytes(u))
+	bi.wo += int(unsafe.Sizeof(u))
+	return bi.wo
+}
+
 func (bi *BytesIter) WriteString(s string) int {
 	var l = len(s)
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
@@ -108,6 +115,13 @@ func (bi *BytesIter) IterUint64() uint64 {
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
 	u := *(*uint64)(unsafe.Pointer(&buf[bi.ro]))
 	bi.ro += int(unsafe.Sizeof(uint64(0)))
+	return u
+}
+
+func (bi *BytesIter) IterInt64() int64 {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	u := *(*int64)(unsafe.Pointer(&buf[bi.ro]))
+	bi.ro += int(unsafe.Sizeof(int64(0)))
 	return u
 }
 
