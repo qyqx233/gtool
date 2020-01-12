@@ -1,8 +1,9 @@
 package bytess
 
 import (
-	"github.com/qyqx233/gtool/lib/assert"
 	"testing"
+
+	"github.com/qyqx233/gtool/lib/assert"
 )
 
 type byteBuffer1 struct {
@@ -26,6 +27,7 @@ func BenchmarkC1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		bs := NewByteBuffer(make([]byte, 20))
 		bs.WriteString("aaaabbbb")
+		_ = bs.String()
 	}
 }
 
@@ -70,4 +72,27 @@ func Test2x(t *testing.T) {
 	assert.AssertTrue(t, bi1.IterByte() == 12)
 	assert.AssertTrue(t, bi1.IterInt() == 100)
 	assert.AssertTrue(t, bi1.IterString() == "xxx")
+}
+
+func Test2y(t *testing.T) {
+	array := [100]byte{}
+	bi := NewBytesIter(array[:])
+	bi.WriteUint64(100)
+	bi.WriteString("aasdf")
+	buf := bi.Bytes()
+	copy(buf[9:], "12356")
+	assert.AssertEqual(t, bi.IterUint64(), 100)
+	assert.AssertEqual(t, bi.IterString(), "12356")
+}
+
+func Test2z(t *testing.T) {
+	bb := NewByteBuffer(make([]byte, 6))
+	bb.WriteString("今天早点做饭")
+	bb.WriteString(" at ")
+	t.Log(bb.len)
+	s := bb.String()
+	t.Log(s)
+	t.Log(len(s), len("今天早点做饭 at "))
+	// bb.WriteString(time.Unix(int64(1578810819), 0).Format("2006-01-02 15:04:05"))
+	assert.AssertStringEqual(t, bb.String(), "今天早点做饭 at ")
 }

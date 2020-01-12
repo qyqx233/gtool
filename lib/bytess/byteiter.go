@@ -39,6 +39,13 @@ func (bi *BytesIter) Bytes() []byte {
 	return buf[:bi.wo]
 }
 
+func (bi *BytesIter) BytesCopy() []byte {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	buf1 := make([]byte, bi.wo)
+	copy(buf1, buf)
+	return buf1
+}
+
 func (bi *BytesIter) WriteUint64(u uint64) int {
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
 	copy(buf[bi.wo:], convert.Uint642Bytes(u))
@@ -49,6 +56,13 @@ func (bi *BytesIter) WriteUint64(u uint64) int {
 func (bi *BytesIter) WriteInt(u int) int {
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
 	copy(buf[bi.wo:], convert.Int2Bytes(u))
+	bi.wo += int(unsafe.Sizeof(u))
+	return bi.wo
+}
+
+func (bi *BytesIter) WriteInt64(u int64) int {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	copy(buf[bi.wo:], convert.Int642Bytes(u))
 	bi.wo += int(unsafe.Sizeof(u))
 	return bi.wo
 }
@@ -108,6 +122,13 @@ func (bi *BytesIter) IterUint64() uint64 {
 	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
 	u := *(*uint64)(unsafe.Pointer(&buf[bi.ro]))
 	bi.ro += int(unsafe.Sizeof(uint64(0)))
+	return u
+}
+
+func (bi *BytesIter) IterInt64() int64 {
+	buf := *(*[]byte)(unsafe.Pointer(bi.buf))
+	u := *(*int64)(unsafe.Pointer(&buf[bi.ro]))
+	bi.ro += int(unsafe.Sizeof(int64(0)))
 	return u
 }
 

@@ -1,5 +1,7 @@
 package assert
 
+import "strings"
+
 type TestIface interface {
 	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
@@ -16,6 +18,15 @@ type TestIface interface {
 	SkipNow()
 	Skipf(format string, args ...interface{})
 	Skipped() bool
+}
+
+func AssertStringEqual(t TestIface, a, b interface{}) {
+	t.Helper()
+	as := a.(string)
+	bs := b.(string)
+	if strings.Compare(as, bs) != 0 {
+		t.Errorf("Not Equal. %d %d", a, b)
+	}
 }
 
 func AssertEqual(t TestIface, a, b interface{}) {
