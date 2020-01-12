@@ -3,7 +3,7 @@ package bytess
 import (
 	"unsafe"
 
-	"github.com/qyqx233/fastweb/lib/convert"
+	"github.com/qyqx233/gtool/lib/convert"
 )
 
 type byteSliceStru struct {
