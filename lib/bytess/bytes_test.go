@@ -1,6 +1,15 @@
 package bytess
 
 import (
+	"encoding/binary"
+	"fmt"
+	"go/ast"
+	"go/importer"
+	"go/parser"
+	"go/token"
+	"go/types"
+	"os"
+	"sort"
 	"testing"
 
 	"github.com/qyqx233/gtool/lib/assert"
@@ -95,4 +104,78 @@ func Test2z(t *testing.T) {
 	t.Log(len(s), len("今天早点做饭 at "))
 	// bb.WriteString(time.Unix(int64(1578810819), 0).Format("2006-01-02 15:04:05"))
 	assert.AssertStringEqual(t, bb.String(), "今天早点做饭 at ")
+}
+
+func Test3z(t *testing.T) {
+	x := 1024
+	t.Log(byte(x))
+	t.Log(byte(x >> 8))
+}
+
+func fx(bs []byte) []byte {
+	return append(bs, "abc"...)
+}
+
+func Test4a(t *testing.T) {
+	var data = []int{255, 255, 255}
+	pktLen := int(uint32(data[0]) | uint32(data[1])<<8 | uint32(data[2])<<16)
+	t.Log(binary.LittleEndian.Uint16([]byte{1, 2}))
+	t.Log(pktLen)
+	t.Log(clientFoundRows, clientLongPassword)
+	var buf [9]byte
+	t.Log(len(buf), cap(buf))
+	r := fx(buf[:0])
+	t.Log(len(r), cap(r))
+	t.Log(copy(buf[3:], []byte("xyz")))
+	// t.Log(inf)
+	// reflect.valueOf()
+}
+
+func Test_sss(t *testing.T) {
+	fd, err := os.OpenFile("a.cpp", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	defer fd.Close()
+	fd.WriteString(fmt.Sprintf("auto map = unordered_map<string, int>{\n"))
+	// fd.WriteString("};")
+}
+
+func Test_xxd(t *testing.T) {
+	fset := token.NewFileSet()
+	// 解析文件，主要解析token
+	f, err := parser.ParseFile(fset, "const.go", nil, parser.ParseComments)
+	if err != nil {
+		t.Error(err)
+	}
+	conf := types.Config{Importer: importer.Default()}
+	pkg, err := conf.Check("bytess", fset, []*ast.File{f}, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	type S struct {
+		k, v string
+	}
+	var sl []S
+	for _, v := range f.Scope.Objects {
+		if v.Kind == ast.Con {
+			name := v.Name
+			val := pkg.Scope().Lookup(v.Name).(*types.Const).Val()
+			sl = append(sl, S{name, val.String()})
+			// d := v.Decl.(*ast.ValueSpec)
+			// m[pkg.Scope().Lookup(v.Name).(*types.Const).Val().String()] = d.Comment.Text()
+		}
+	}
+	sort.Slice(sl, func(i, j int) bool {
+		return sl[i].k < sl[j].k
+	})
+	fd, err := os.OpenFile("a.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		t.Error(err)
+	}
+	defer fd.Close()
+	for _, v := range sl {
+		fd.WriteString("#define " + v.k + " " + v.v + "\n")
+	}
 }
