@@ -1,7 +1,5 @@
 package http
 
-package util
-
 import (
 	"bytes"
 	"crypto/tls"
