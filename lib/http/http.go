@@ -3,7 +3,6 @@ package http
 import (
 	"bytes"
 	"crypto/tls"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -66,7 +65,6 @@ func (opt *RequestOption) HttpGet(reqUrl string, header map[string]string, timeo
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println(resp.StatusCode, resp.Status)
 	if resp.Body != nil {
 		defer resp.Body.Close()
 	}
