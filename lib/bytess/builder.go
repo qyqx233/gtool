@@ -22,16 +22,18 @@ func NewByteBuffer(bs []byte) *ByteBuffer {
 	}
 }
 
-func (b *ByteBuffer) WriteString(s string) {
-	if b.len+len(s) > b.cap {
-		buf := make([]byte, b.len*2+len(s))
+func (b *ByteBuffer) ensureCap(n int) {
+	if b.len+n > b.cap {
+		buf := make([]byte, b.len*2+n)
 		copy(buf, b.buf)
-		copy(buf[b.len:], s)
 		b.buf = buf
 		b.cap = len(buf)
-	} else {
-		copy(b.buf[b.len:], s)
 	}
+}
+
+func (b *ByteBuffer) WriteString(s string) {
+	b.ensureCap(len(s))
+	copy(b.buf[b.len:], s)
 	b.len += len(s)
 }
 
@@ -44,15 +46,8 @@ func (b *ByteBuffer) Cap() int {
 }
 
 func (b *ByteBuffer) WriteBytes(s []byte) {
-	if b.len+len(s) > b.cap {
-		buf := make([]byte, b.len*2+len(s))
-		copy(buf, b.buf)
-		copy(buf[b.len:], s)
-		b.buf = buf
-		b.cap = len(buf)
-	} else {
-		copy(b.buf[b.len:], s)
-	}
+	b.ensureCap(len(s))
+	copy(b.buf[b.len:], s)
 	b.len += len(s)
 }
 
