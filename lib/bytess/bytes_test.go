@@ -32,6 +32,15 @@ func (b *byteBuffer1) WriteString(s string) (int, error) {
 	return len(s), nil
 }
 
+func Test22(t *testing.T) {
+	bs := NewByteBuffer(make([]byte, 5))
+	bs.WriteString("abc")
+	t.Log(bs.String())
+	bs.WriteString("111")
+	t.Log(bs.cap, bs.len)
+	t.Log(bs.String())
+}
+
 func BenchmarkC1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		bs := NewByteBuffer(make([]byte, 20))
