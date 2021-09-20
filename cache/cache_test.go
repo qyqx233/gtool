@@ -136,3 +136,53 @@ func Benchmark_all(b *testing.B) {
 	}
 	b.Log(p)
 }
+
+func cacher() *Cacher {
+	const items = 1 << 16
+	c := New(12 * items)
+	return &Cacher{c}
+}
+
+func echoInt(p Marshaler, s uint64) error {
+	fmt.Println("echoInt")
+	p.(*entity.Person).Age = 10
+	return nil
+}
+
+func echo(p Marshaler, s string) error {
+	p.(*entity.Person).Age = 10
+	return nil
+
+}
+func Test_int_deploy(b *testing.T) {
+	var p entity.Person
+	c := cacher()
+	cacheEcho := c.GetIntPrefix(echoInt, "p:")
+	cacheEcho(&p, 1)
+	cacheEcho(&p, 1)
+	cacheEcho(&p, 2)
+}
+func Test_deploy(b *testing.T) {
+	var p entity.Person
+	c := cacher()
+	cacheEcho := c.GetStringPrefix(echo, "p:")
+	cacheEcho(&p, "a")
+	cacheEcho(&p, "a")
+}
+func Benchmark_int_deploy(b *testing.B) {
+	c := cacher()
+	var p entity.Person
+	cacheEcho := c.GetIntPrefix(echoInt, "p:")
+	for i := 0; i < b.N; i++ {
+		cacheEcho(&p, 1)
+	}
+}
+
+func Benchmark_deploy(b *testing.B) {
+	c := cacher()
+	var p entity.Person
+	cacheEcho := c.GetStringPrefix(echo, "p:")
+	for i := 0; i < b.N; i++ {
+		cacheEcho(&p, "a")
+	}
+}

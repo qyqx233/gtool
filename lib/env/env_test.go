@@ -11,5 +11,6 @@ func Test_env1(t *testing.T) {
 	t.Log(path.Split(wd))
 	// t.Log(strings.Split(wd, os.PathSeparator))
 	dir, err := GetProjDir()
+
 	t.Log(dir, err)
 }
